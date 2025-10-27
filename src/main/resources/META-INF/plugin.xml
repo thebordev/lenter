@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <idea-plugin>
-    <id>com.theboringdevelopers.lenter</id>
+    <id>com.theboringdevelopers.commentator</id>
     <name>Lenter</name>
     <vendor email="support@theboringdevelopers.com" url="https://github.com/theboringdevelopers">The Boring Developers
     </vendor>

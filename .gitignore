@@ -19,6 +19,7 @@ build/
 .idea/**/dynamic.xml
 .idea/**/uiDesigner.xml
 .idea/**/dbnavigator.xml
+.kotlin/
 *.iml
 *.ipr
 *.iws
