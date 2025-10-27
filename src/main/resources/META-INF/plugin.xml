@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<idea-plugin>
+    <id>com.theboringdevelopers.commentator</id>
+    <name>Lenter</name>
+    <vendor email="support@theboringdevelopers.com" url="https://github.com/theboringdevelopers">The Boring Developers
+    </vendor>
+
+    <description><![CDATA[
+    <h2>Lenter - AI-Powered Code Documentation & Bug Reporting</h2>
+
+    <p>Automate routine developer tasks: generate KDoc comments and create formatted Jira bug reports directly from your IDE.</p>
+
+    <h3>✨ Features</h3>
+
+    <h4>📝 KDoc Comment Generation</h4>
+    <ul>
+        <li><b>Smart Documentation:</b> Automatically generates KDoc comments in Russian for Kotlin classes, functions, and properties</li>
+        <li><b>Batch Processing:</b> Comment entire classes with a single shortcut</li>
+        <li><b>Consistent Style:</b> Follows your project's documentation standards</li>
+        <li><b>AI-Powered:</b> Uses local Ollama models - your code never leaves your machine</li>
+        <li><b>Supports:</b> @property, @param, @return tags with intelligent detection</li>
+    </ul>
+
+    <h4>🐛 Bug Report Generator</h4>
+    <ul>
+        <li><b>Natural Language Input:</b> Describe bugs in free text</li>
+        <li><b>Auto-Formatting:</b> Converts to Jira-compatible tables with proper markup</li>
+        <li><b>Editable Templates:</b> Review and modify before submission</li>
+        <li><b>Live Preview:</b> See formatted output in real-time</li>
+        <li><b>Direct Integration:</b> Create Jira issues with one click</li>
+        <li><b>Structured Output:</b> Includes environment, steps to reproduce, expected vs actual results</li>
+    </ul>
+
+    <h3>⌨️ Shortcuts</h3>
+    <ul>
+        <li><b>Ctrl+Alt+K</b> (⌘+⌥+K on Mac) - Generate comments for entire class</li>
+        <li><b>Ctrl+Alt+B</b> - Open bug report generator</li>
+    </ul>
+
+    <h3>🚀 Quick Start</h3>
+    <ol>
+        <li>Install <a href="https://ollama.ai/">Ollama</a> and download a model:
+            <pre>ollama pull qwen2.5-coder:7b</pre>
+        </li>
+        <li>Configure plugin: <b>Settings → Tools → Commentator Settings</b>
+            <ul>
+                <li>Ollama API URL: <code>http://localhost:11434</code></li>
+                <li>Model: <code>qwen2.5-coder:7b</code></li>
+            </ul>
+        </li>
+        <li>(Optional) For Jira integration:
+            <ul>
+                <li>Set Jira URL and Project settings</li>
+                <li>Create Personal Access Token in Jira</li>
+                <li>Configure token in plugin settings</li>
+            </ul>
+        </li>
+    </ol>
+
+    <h3>🔒 Privacy First</h3>
+    <ul>
+        <li>Uses local Ollama instance - no cloud APIs</li>
+        <li>Your code never leaves your machine</li>
+        <li>No telemetry or data collection</li>
+    </ul>
+
+    <h3>🎯 Recommended Models</h3>
+    <ul>
+        <li><b>qwen2.5-coder:7b</b> - Best balance of quality and speed</li>
+        <li><b>qwen2.5-coder:3b</b> - Faster, lighter option</li>
+        <li><b>llama3.1:8b</b> - Alternative choice</li>
+    </ul>
+
+    <h3>💡 Use Cases</h3>
+    <ul>
+        <li>Document legacy code quickly</li>
+        <li>Maintain consistent documentation style across team</li>
+        <li>Speed up code reviews with proper documentation</li>
+        <li>Create detailed bug reports without manual formatting</li>
+        <li>Streamline QA workflow with Jira integration</li>
+    </ul>
+
+    <h3>🛠️ Requirements</h3>
+    <ul>
+        <li>IntelliJ IDEA 2025.1+ or any JetBrains IDE</li>
+        <li>Java 21+</li>
+        <li>Ollama installed locally</li>
+        <li>(Optional) Jira instance with Personal Access Tokens support</li>
+    </ul>
+
+    <h3>📚 Learn More</h3>
+    <p>
+        <a href="https://github.com/theboringdevelopers/lenter">Documentation</a> |
+        <a href="https://github.com/theboringdevelopers/lenter/issues">Report Issues</a> |
+        <a href="https://ollama.ai/">Ollama Setup Guide</a>
+    </p>
+    ]]></description>
+
+    <change-notes><![CDATA[
+    <h3>Version 1.0.0</h3>
+    <ul>
+        <li><b>Initial Release</b></li>
+        <li>KDoc generation for Kotlin classes, functions, and properties</li>
+        <li>Batch comment generation for entire classes</li>
+        <li>Bug report generator with Jira integration</li>
+        <li>Editable templates with live preview</li>
+        <li>Support for multiple Ollama models</li>
+        <li>Confluence Wiki Markup formatting for Jira</li>
+        <li>Personal Access Token authentication</li>
+    </ul>
+
+    <h3>Features</h3>
+    <ul>
+        <li>✅ Russian language documentation support</li>
+        <li>✅ Smart @property, @param, @return detection</li>
+        <li>✅ Customizable Ollama model selection</li>
+        <li>✅ Configurable request timeout</li>
+        <li>✅ Progress indicators for long operations</li>
+        <li>✅ Error handling with detailed messages</li>
+    </ul>
+    ]]></change-notes>
+
+    <!-- Базовые зависимости -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.kotlin</depends>
+
+    <!-- Совместимость с Kotlin K2 -->
+    <extensions defaultExtensionNs="org.jetbrains.kotlin">
+        <supportsKotlinPluginMode supportsK2="true"/>
+    </extensions>
+
+    <!-- Расширения плагина -->
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Страница настроек -->
+        <applicationConfigurable
+                instance="com.theboringdevelopers.commentator.settings.CommentatorSettingsConfigurable"
+                id="com.theboringdevelopers.commentator.settings"
+                displayName="Commentator"/>
+
+        <!-- Сервисы настроек -->
+        <applicationService
+                serviceImplementation="com.theboringdevelopers.commentator.settings.CommentatorSettingsState"/>
+        <applicationService
+                serviceImplementation="com.theboringdevelopers.commentator.settings.JiraSettingsState"/>
+    </extensions>
+
+    <!-- Действия и хоткеи -->
+    <actions>
+        <action id="Commentator.GenerateKDoc"
+                class="com.theboringdevelopers.commentator.actions.GenerateKDocForClassAction"
+                text="Lenter: Generate KDoc for Class"
+                description="Generate KDoc comments for entire Kotlin class and its members">
+            <!-- дефолтный хоткей для всех -->
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt K"/>
+            <!-- хоткей для macOS -->
+            <keyboard-shortcut keymap="Mac OS X" first-keystroke="meta alt K"/>
+            <add-to-group group-id="CodeMenu" anchor="last"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+
+        <action id="Commentator.GenerateBugReport"
+                class="com.theboringdevelopers.commentator.bugreport.GenerateBugReportAction"
+                text="Lenter: Generate Bug Report"
+                description="Generate formatted bug report and create Jira issue">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt B"/>
+            <keyboard-shortcut keymap="Mac OS X" first-keystroke="meta alt B"/>
+        </action>
+    </actions>
+</idea-plugin>
