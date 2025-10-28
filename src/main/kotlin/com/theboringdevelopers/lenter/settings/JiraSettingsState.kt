@@ -91,11 +91,12 @@ class JiraSettingsState : PersistentStateComponent<JiraSettingsState> {
             logger.warn("Local properties override path '$overridePath' does not exist or is not a file")
         }
 
-        val defaultPath = sequenceOfNotNull(
+        val defaultPath = listOfNotNull(
             System.getProperty("user.dir")?.let { Paths.get(it) },
             PathManager.getPluginsPath()?.let { Paths.get(it) },
             PathManager.getHomePath()?.let { Paths.get(it) },
         )
+            .asSequence()
             .map { it.resolve("local.properties") }
             .firstOrNull(Files::isRegularFile)
 
