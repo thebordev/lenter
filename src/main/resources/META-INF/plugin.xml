@@ -163,8 +163,18 @@
                 text="Lenter: Generate Bug Report"
                 description="Generate formatted bug report and create Jira issue">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
-            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt B"/>
-            <keyboard-shortcut keymap="Mac OS X" first-keystroke="meta alt B"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift B"/>
+            <keyboard-shortcut keymap="Mac OS X" first-keystroke="meta alt shift B"/>
+            <keyboard-shortcut keymap="macOS" first-keystroke="meta alt shift B"/>
+        </action>
+        <action id="Commentator.AddJiraComment"
+                class="com.theboringdevelopers.lenter.actions.AddJiraCommentAction"
+                text="Lenter: Add Comment to Jira"
+                description="Add comment to Jira issue from current Git branch">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift C"/>
+            <keyboard-shortcut keymap="Mac OS X" first-keystroke="meta alt shift C"/>
+            <keyboard-shortcut keymap="macOS" first-keystroke="meta alt shift C"/>
         </action>
     </actions>
 </idea-plugin>
