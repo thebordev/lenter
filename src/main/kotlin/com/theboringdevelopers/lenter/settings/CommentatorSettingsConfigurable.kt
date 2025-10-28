@@ -2,9 +2,11 @@ package com.theboringdevelopers.lenter.settings
 
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.options.ConfigurationException
+import com.intellij.openapi.ui.Messages
 import com.intellij.ui.HyperlinkLabel
 import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBLabel
+import com.intellij.ui.components.JBButton
 import com.intellij.ui.components.JBPasswordField
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.FormBuilder
@@ -44,6 +46,11 @@ class CommentatorSettingsConfigurable : Configurable {
         .addVerticalGap(15)
 
         .addComponent(JBLabel("<html><b>Jira Settings</b></html>"))
+        .addComponent(
+            JBButton("Загрузить из local.properties").apply {
+                addActionListener { loadJiraSettingsFromLocalProperties() }
+            }
+        )
         .addVerticalGap(5)
         .addLabeledComponent("Jira URL:", jiraUrlField, 1, false)
         .addTooltip("URL вашего Jira сервера (например: https://jira.company.com)")
@@ -149,4 +156,31 @@ class CommentatorSettingsConfigurable : Configurable {
     }
 
     override fun getDisplayName(): String = "Lenter"
+
+    private fun loadJiraSettingsFromLocalProperties() {
+        val defaults = jiraSettings.readLocalProperties()
+
+        if (defaults == null) {
+            Messages.showWarningDialog(
+                panel,
+                "local.properties не найден или не содержит Jira настройки.",
+                "Не удалось загрузить настройки",
+            )
+            return
+        }
+
+        defaults.jiraUrl?.let { jiraUrlField.text = it }
+        defaults.jiraUsername?.let { jiraUsernameField.text = it }
+        defaults.jiraApiToken?.let { jiraApiTokenField.text = it }
+        defaults.jiraProjectId?.let { jiraProjectIdField.text = it }
+        defaults.jiraProjectKey?.let { jiraProjectKeyField.text = it }
+        defaults.jiraIssueType?.let { jiraIssueTypeField.text = it }
+        defaults.jiraPriority?.let { jiraPriorityField.text = it }
+
+        Messages.showInfoMessage(
+            panel,
+            "Настройки Jira загружены из ${defaults.origin}.",
+            "Настройки обновлены",
+        )
+    }
 }
