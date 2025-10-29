@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Cache Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build plugin zip
+        run: ./gradlew buildPlugin -x buildSearchableOptions
+
+      - name: Extract release notes from CHANGELOG.md
+        id: notes
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          NOTES=$(awk 'f{ if ($0 ~ /^##[[:space:]]+/) exit; print } /^##[[:space:]]+/{ if (++i==1) f=1 }' CHANGELOG.md)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          printf "%s" "$NOTES" > release-notes.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: lenter v${{ steps.notes.outputs.version }}
+          body_path: release-notes.txt
+          files: |
+            build/distributions/*.zip
