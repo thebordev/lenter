@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.theboringdevelopers"
-version = "1.0.0"
+version = "1.0.1"
 
 repositories {
     mavenCentral()
@@ -32,7 +32,22 @@ intellijPlatform {
         }
 
         changeNotes = """
-            Initial version
+            <h3>Version 1.0.1</h3>
+            <ul>
+                <li>Добавлена поддержка добавления комментариев в существующие задачи Jira из IDE</li>
+                <li>Обновлены горячие клавиши для генератора баг-репортов и комментариев</li>
+                <li>Расширена документация по настройке Ollama и интеграции с Jira</li>
+            </ul>
+
+            <h3>Version 1.0.0</h3>
+            <li><b>Initial Release</b></li>
+            <li>KDoc generation for Kotlin classes, functions, and properties</li>
+            <li>Batch comment generation for entire classes</li>
+            <li>Bug report generator with Jira integration</li>
+            <li>Editable templates with live preview</li>
+            <li>Support for multiple Ollama models</li>
+            <li>Confluence Wiki Markup formatting for Jira</li>
+            <li>Personal Access Token authentication</li>
         """.trimIndent()
     }
 }
