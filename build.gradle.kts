@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.theboringdevelopers"
-version = "1.0.0"
+version = "1.0.1"
 
 repositories {
     mavenCentral()
@@ -32,7 +32,17 @@ intellijPlatform {
         }
 
         changeNotes = """
-            Initial version
+            <h3>Version 1.0.1</h3>
+            <ul>
+                <li>Добавлена поддержка добавления комментариев в существующие задачи Jira из IDE</li>
+                <li>Обновлены горячие клавиши для генератора баг-репортов и комментариев</li>
+                <li>Расширена документация по настройке Ollama и интеграции с Jira</li>
+            </ul>
+
+            <h3>Version 1.0.0</h3>
+            <ul>
+                <li>Initial version</li>
+            </ul>
         """.trimIndent()
     }
 }
