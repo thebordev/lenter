@@ -165,6 +165,8 @@
                 serviceImplementation="com.theboringdevelopers.lenter.settings.states.PreviewSettingsState"/>
 
         <colorProvider implementation="com.theboringdevelopers.lenter.feature.colors.ComposeColorProvider"/>
+        <gotoDeclarationHandler
+                implementation="com.theboringdevelopers.lenter.feature.resources.ComposeResourceDeclarationHandler"/>
     </extensions>
 
     <!-- Действия и хоткеи -->
