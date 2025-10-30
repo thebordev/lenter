@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.theboringdevelopers"
-version = "1.0.1"
+version = "1.0.2"
 
 repositories {
     mavenCentral()
@@ -32,6 +32,12 @@ intellijPlatform {
         }
 
         changeNotes = """
+            <h3>Version 1.0.2</h3>
+            <ul>
+                <li>PreviewColor для Compose: отображение и редактирование оттенков прямо в редакторе</li>
+                <li>Новые настройки предпросмотра цветов и иконок в gutter</li>
+            </ul>
+
             <h3>Version 1.0.1</h3>
             <ul>
                 <li>Добавлена поддержка добавления комментариев в существующие задачи Jira из IDE</li>
@@ -40,13 +46,15 @@ intellijPlatform {
             </ul>
 
             <h3>Version 1.0.0</h3>
-            <li>KDoc generation for Kotlin classes, functions, and properties</li>
-            <li>Batch comment generation for entire classes</li>
-            <li>Bug report generator with Jira integration</li>
-            <li>Editable templates with live preview</li>
-            <li>Support for multiple Ollama models</li>
-            <li>Confluence Wiki Markup formatting for Jira</li>
-            <li>Personal Access Token authentication</li>
+            <ul>
+                <li>KDoc generation for Kotlin classes, functions, and properties</li>
+                <li>Batch comment generation for entire classes</li>
+                <li>Bug report generator with Jira integration</li>
+                <li>Editable templates with live preview</li>
+                <li>Support for multiple Ollama models</li>
+                <li>Confluence Wiki Markup formatting for Jira</li>
+                <li>Personal Access Token authentication</li>
+            </ul>
         """.trimIndent()
     }
 }
