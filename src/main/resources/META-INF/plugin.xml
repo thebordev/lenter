@@ -38,6 +38,13 @@
         <li><b>Customizable Display:</b> Configure icon size, placement, and contrast indicators</li>
     </ul>
 
+    <h4>🧭 Compose Resource Navigation (KMP/CMP)</h4>
+    <ul>
+        <li><b>Go To Declaration:</b> Jump from Compose resource usages to their declarations with one shortcut</li>
+        <li><b>Context-Aware:</b> Works with colors, typography and other custom providers</li>
+        <li><b>Productivity Boost:</b> Keeps you in the flow when exploring UI code</li>
+    </ul>
+
     <h3>⌨️ Shortcuts</h3>
     <ul>
         <li><b>Ctrl+Alt+K</b> (⌘+⌥+K on Mac) - Generate comments for entire class</li>
@@ -89,7 +96,7 @@
 
     <h3>🛠️ Requirements</h3>
     <ul>
-        <li>IntelliJ IDEA 2025.1+ or any JetBrains IDE</li>
+        <li>IntelliJ IDEA 2024.1+ or any JetBrains IDE</li>
         <li>Java 21+</li>
         <li>Ollama installed locally</li>
         <li>(Optional) Jira instance with Personal Access Tokens support</li>
@@ -104,6 +111,12 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <h3>Version 1.0.3</h3>
+    <ul>
+        <li>ComposeResourceDeclarationHandler: быстрый переход к ресурсам Jetpack Compose из места использования</li>
+        <li>Совместимость расширена до IntelliJ IDEA 2024.1+</li>
+    </ul>
+
     <h3>Version 1.0.2</h3>
     <ul>
         <li>PreviewColor для Compose: живой предпросмотр и редактирование оттенков в редакторе</li>

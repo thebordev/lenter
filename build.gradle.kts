@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.theboringdevelopers"
-version = "1.0.2"
+version = "1.0.3"
 
 repositories {
     mavenCentral()
@@ -18,7 +18,7 @@ repositories {
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     intellijPlatform {
-        create("IC", "2025.1.4.1")
+        create("IC", "2024.1.7")
         testFramework(org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform)
 
         bundledPlugin("org.jetbrains.kotlin")
@@ -28,10 +28,16 @@ dependencies {
 intellijPlatform {
     pluginConfiguration {
         ideaVersion {
-            sinceBuild = "251"
+            sinceBuild = "241"
         }
 
         changeNotes = """
+            <h3>Version 1.0.3</h3>
+            <ul>
+                <li>ComposeResourceDeclarationHandler: быстрый переход к ресурсам Jetpack Compose по клику</li>
+                <li>Поддержка более ранних версий IntelliJ IDEA (начиная с 2024.1)</li>
+            </ul>
+
             <h3>Version 1.0.2</h3>
             <ul>
                 <li>PreviewColor для Compose: отображение и редактирование оттенков прямо в редакторе</li>
