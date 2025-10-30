@@ -1,10 +1,14 @@
-package com.theboringdevelopers.lenter.settings
+package com.theboringdevelopers.lenter.settings.states
 
 import com.intellij.credentialStore.CredentialAttributes
 import com.intellij.credentialStore.Credentials
 import com.intellij.credentialStore.generateServiceName
 import com.intellij.ide.passwordSafe.PasswordSafe
-import com.intellij.openapi.components.*
+import com.intellij.openapi.components.PersistentStateComponent
+import com.intellij.openapi.components.Service
+import com.intellij.openapi.components.State
+import com.intellij.openapi.components.Storage
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import java.nio.file.Files
 import java.nio.file.Path
@@ -15,7 +19,7 @@ import kotlin.io.path.isRegularFile
 
 @Service
 @State(
-    name = "JiraSettings",
+    name = "com.theboringdevelopers.lenter.settings.states.JiraSettingsState",
     storages = [Storage("LenterJiraSettings.xml")]
 )
 class JiraSettingsState : PersistentStateComponent<JiraSettingsState.State> {
@@ -124,7 +128,7 @@ class JiraSettingsState : PersistentStateComponent<JiraSettingsState.State> {
 
     private fun getTokenFromPasswordSafe(): String? {
         val credentialAttributes = createCredentialAttributes()
-        return PasswordSafe.instance.getPassword(credentialAttributes)
+        return PasswordSafe.Companion.instance.getPassword(credentialAttributes)
     }
 
     private fun saveTokenToPasswordSafe(token: String) {
@@ -134,7 +138,7 @@ class JiraSettingsState : PersistentStateComponent<JiraSettingsState.State> {
         } else {
             null
         }
-        PasswordSafe.instance.set(credentialAttributes, credentials)
+        PasswordSafe.Companion.instance.set(credentialAttributes, credentials)
     }
 
     private fun createCredentialAttributes(): CredentialAttributes {

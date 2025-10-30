@@ -1,7 +1,7 @@
 package com.theboringdevelopers.lenter.ollama
 
 import com.intellij.openapi.diagnostic.Logger
-import com.theboringdevelopers.lenter.settings.CommentatorSettingsState
+import com.theboringdevelopers.lenter.settings.states.LinterSettingsState
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
@@ -9,7 +9,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 class OllamaClient(
-    private val settings: CommentatorSettingsState,
+    private val settings: LinterSettingsState,
 ) {
     private val logger = Logger.getInstance(OllamaClient::class.java)
 

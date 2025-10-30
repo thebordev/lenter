@@ -7,29 +7,45 @@ import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.HyperlinkLabel
 import com.intellij.ui.JBIntSpinner
+import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPasswordField
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.FormBuilder
 import com.intellij.util.ui.JBUI
+import com.theboringdevelopers.lenter.settings.states.JiraSettingsState
+import com.theboringdevelopers.lenter.settings.states.LinterSettingsState
+import com.theboringdevelopers.lenter.settings.states.PreviewSettingsState
 import java.net.URL
 import javax.swing.*
 
-class CommentatorSettingsConfigurable : Configurable {
+class Configurable : Configurable {
 
     private companion object {
         const val MIN_TIMEOUT = 10
         const val MAX_TIMEOUT = 600
+        const val MIN_ICON_SIZE = 8
+        const val MAX_ICON_SIZE = 24
         const val DEFAULT_LABEL_WIDTH = 160
     }
 
-    private val ollamaSettings = CommentatorSettingsState.getInstance()
+    private val ollamaSettings = LinterSettingsState.getInstance()
     private val jiraSettings = JiraSettingsState.getInstance()
+    private val previewSettings = PreviewSettingsState.getInstance()
 
+    // Ollama Settings
     private val apiUrlField = JBTextField()
     private val modelField = JBTextField()
     private val timeoutField = JBIntSpinner(MIN_TIMEOUT, MIN_TIMEOUT, MAX_TIMEOUT)
 
+    // Preview Settings
+    private val composeColorPreviewCheckBox = JBCheckBox("Включить предпросмотр цветов Compose")
+    private val showColorInGutterCheckBox = JBCheckBox("Показывать иконки цвета в gutter")
+    private val colorIconSizeSpinner = JBIntSpinner(12, MIN_ICON_SIZE, MAX_ICON_SIZE)
+    private val brushGradientPreviewCheckBox = JBCheckBox("Включить предпросмотр Brush градиентов")
+    private val gradientIconSizeSpinner = JBIntSpinner(12, MIN_ICON_SIZE, MAX_ICON_SIZE)
+
+    // Jira Settings
     private val localPropertiesPathField = TextFieldWithBrowseButton().apply {
         val descriptor = FileChooserDescriptorFactory.createSingleFileDescriptor()
             .withTitle("Выберите local.properties")
@@ -63,6 +79,9 @@ class CommentatorSettingsConfigurable : Configurable {
         return apiUrlField.text.trim() != ollamaSettings.ollamaApiUrl ||
                 modelField.text.trim() != ollamaSettings.modelName ||
                 timeoutField.number != ollamaSettings.requestTimeoutSeconds ||
+
+                composeColorPreviewCheckBox.isSelected != previewSettings.composeColorPreviewEnabled ||
+
                 localPropertiesPathField.text.trim() != jiraSettings.localPropertiesPath ||
                 jiraUrlField.text.trim() != jiraSettings.jiraUrl ||
                 jiraUsernameField.text.trim() != jiraSettings.jiraUsername ||
@@ -76,14 +95,20 @@ class CommentatorSettingsConfigurable : Configurable {
     @Throws(ConfigurationException::class)
     override fun apply() {
         validateAndApplyOllamaSettings()
+        validateAndApplyPreviewSettings()
         validateAndApplyJiraSettings()
     }
 
     override fun reset() {
+        // Ollama
         apiUrlField.text = ollamaSettings.ollamaApiUrl
         modelField.text = ollamaSettings.modelName
         timeoutField.number = ollamaSettings.requestTimeoutSeconds
 
+        // Preview
+        composeColorPreviewCheckBox.isSelected = previewSettings.composeColorPreviewEnabled
+
+        // Jira
         localPropertiesPathField.text = jiraSettings.localPropertiesPath
         jiraUrlField.text = jiraSettings.jiraUrl
         jiraUsernameField.text = jiraSettings.jiraUsername
@@ -101,6 +126,7 @@ class CommentatorSettingsConfigurable : Configurable {
     override fun getDisplayName(): String = "Lenter"
 
     private fun createPanel(): JPanel = FormBuilder.createFormBuilder()
+        // Ollama Settings
         .addComponent(JBLabel("<html><b>Ollama Settings</b></html>"))
         .addVerticalGap(5)
         .addLabeledComponent("Ollama API URL:", apiUrlField, 1, false)
@@ -114,6 +140,39 @@ class CommentatorSettingsConfigurable : Configurable {
         .addComponent(JSeparator())
         .addVerticalGap(15)
 
+        // Preview Settings
+        .addComponent(JBLabel("<html><b>Preview</b></html>"))
+        .addVerticalGap(5)
+        .addComponent(JBLabel("<html><i>Настройки визуального отображения цветов и градиентов</i></html>").apply {
+            border = JBUI.Borders.emptyBottom(5)
+        })
+
+        .addComponent(JBLabel("<html><b>Compose Color Preview:</b></html>").apply {
+            border = JBUI.Borders.emptyTop(5)
+        })
+        .addComponent(composeColorPreviewCheckBox)
+        .addTooltip("Показывать квадраты с цветом для вызовов androidx.compose.ui.graphics.Color")
+        .addComponent(showColorInGutterCheckBox)
+        .addTooltip("Отображать иконки цвета на левой панели редактора")
+        .addLabeledComponent("Размер иконки цвета (px):", colorIconSizeSpinner, 1, false)
+        .addTooltip("Размер квадрата с цветом ($MIN_ICON_SIZE-$MAX_ICON_SIZE пикселей)")
+
+        .addVerticalGap(10)
+        .addComponent(JBLabel("<html><b>Brush Gradient Preview:</b></html>"))
+        .addComponent(brushGradientPreviewCheckBox)
+        .addTooltip("Показывать градиенты для Brush.horizontalGradient, Brush.verticalGradient и др.")
+        .addLabeledComponent("Размер иконки градиента (px):", gradientIconSizeSpinner, 1, false)
+        .addTooltip("Размер иконки с градиентом ($MIN_ICON_SIZE-$MAX_ICON_SIZE пикселей)")
+
+        .addComponent(JBLabel("<html><small><i>Изменения применятся после переоткрытия файлов</i></small></html>").apply {
+            border = JBUI.Borders.emptyTop(10)
+        })
+
+        .addVerticalGap(20)
+        .addComponent(JSeparator())
+        .addVerticalGap(15)
+
+        // Jira Settings
         .addComponent(JBLabel("<html><b>Jira Settings</b></html>"))
         .addVerticalGap(5)
         .addComponent(createLocalPropertiesPanel())
@@ -156,7 +215,8 @@ class CommentatorSettingsConfigurable : Configurable {
         HyperlinkLabel("Создайте Personal Access Token в Jira").apply {
             addHyperlinkListener {
                 val baseUrl = jiraUrlField.text.trim().ifEmpty { "https://your-jira-instance.com" }
-                val tokenUrl = "$baseUrl/secure/ViewProfile.jspa?selectedTab=com.atlassian.pats.pats-plugin:jira-user-personal-access-tokens"
+                val tokenUrl =
+                    "$baseUrl/secure/ViewProfile.jspa?selectedTab=com.atlassian.pats.pats-plugin:jira-user-personal-access-tokens"
                 setHyperlinkTarget(tokenUrl)
             }
             border = JBUI.Borders.emptyLeft(DEFAULT_LABEL_WIDTH)
@@ -193,6 +253,21 @@ class CommentatorSettingsConfigurable : Configurable {
         ollamaSettings.ollamaApiUrl = apiUrl
         ollamaSettings.modelName = model
         ollamaSettings.requestTimeoutSeconds = timeout
+    }
+
+    @Throws(ConfigurationException::class)
+    private fun validateAndApplyPreviewSettings() {
+        val colorIconSize = colorIconSizeSpinner.number
+        if (colorIconSize !in MIN_ICON_SIZE..MAX_ICON_SIZE) {
+            throw ConfigurationException("Размер иконки цвета должен быть в диапазоне $MIN_ICON_SIZE-$MAX_ICON_SIZE пикселей")
+        }
+
+        val gradientIconSize = gradientIconSizeSpinner.number
+        if (gradientIconSize !in MIN_ICON_SIZE..MAX_ICON_SIZE) {
+            throw ConfigurationException("Размер иконки градиента должен быть в диапазоне $MIN_ICON_SIZE-$MAX_ICON_SIZE пикселей")
+        }
+
+        previewSettings.composeColorPreviewEnabled = composeColorPreviewCheckBox.isSelected
     }
 
     @Throws(ConfigurationException::class)

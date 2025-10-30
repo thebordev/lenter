@@ -1,6 +1,6 @@
 package com.theboringdevelopers.lenter.feature.jira
 
-import com.theboringdevelopers.lenter.settings.JiraSettingsState
+import com.theboringdevelopers.lenter.settings.states.JiraSettingsState
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.net.HttpURLConnection

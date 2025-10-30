@@ -11,8 +11,8 @@ import com.intellij.util.ui.FormBuilder
 import com.intellij.util.ui.JBUI
 import com.theboringdevelopers.lenter.feature.jira.JiraClient
 import com.theboringdevelopers.lenter.ollama.OllamaClient
-import com.theboringdevelopers.lenter.settings.CommentatorSettingsState
-import com.theboringdevelopers.lenter.settings.JiraSettingsState
+import com.theboringdevelopers.lenter.settings.states.LinterSettingsState
+import com.theboringdevelopers.lenter.settings.states.JiraSettingsState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -238,7 +238,7 @@ class BugReportDialog(private val project: Project) : DialogWrapper(project) {
 
         scope.launch {
             try {
-                val client = OllamaClient(CommentatorSettingsState.getInstance())
+                val client = OllamaClient(LinterSettingsState.getInstance())
                 val prompt = bugReportGenerator.buildPrompt(description)
 
                 val result = withContext(Dispatchers.IO) {

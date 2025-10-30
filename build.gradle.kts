@@ -40,7 +40,6 @@ intellijPlatform {
             </ul>
 
             <h3>Version 1.0.0</h3>
-            <li><b>Initial Release</b></li>
             <li>KDoc generation for Kotlin classes, functions, and properties</li>
             <li>Batch comment generation for entire classes</li>
             <li>Bug report generator with Jira integration</li>

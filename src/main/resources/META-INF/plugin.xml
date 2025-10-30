@@ -106,7 +106,6 @@
 
     <h3>Version 1.0.0</h3>
     <ul>
-        <li><b>Initial Release</b></li>
         <li>KDoc generation for Kotlin classes, functions, and properties</li>
         <li>Batch comment generation for entire classes</li>
         <li>Bug report generator with Jira integration</li>
@@ -140,15 +139,19 @@
     <extensions defaultExtensionNs="com.intellij">
         <!-- Страница настроек -->
         <applicationConfigurable
-                instance="com.theboringdevelopers.lenter.settings.CommentatorSettingsConfigurable"
+                instance="com.theboringdevelopers.lenter.settings.Configurable"
                 id="com.theboringdevelopers.lenter.settings"
                 displayName="Lenter"/>
 
         <!-- Сервисы настроек -->
         <applicationService
-                serviceImplementation="com.theboringdevelopers.lenter.settings.CommentatorSettingsState"/>
+                serviceImplementation="com.theboringdevelopers.lenter.settings.states.LinterSettingsState"/>
         <applicationService
-                serviceImplementation="com.theboringdevelopers.lenter.settings.JiraSettingsState"/>
+                serviceImplementation="com.theboringdevelopers.lenter.settings.states.JiraSettingsState"/>
+        <applicationService
+                serviceImplementation="com.theboringdevelopers.lenter.settings.states.PreviewSettingsState"/>
+
+        <colorProvider implementation="com.theboringdevelopers.lenter.feature.colors.ComposeColorProvider"/>
     </extensions>
 
     <!-- Действия и хоткеи -->

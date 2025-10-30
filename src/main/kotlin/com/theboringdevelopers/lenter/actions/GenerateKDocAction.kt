@@ -13,7 +13,7 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.util.PsiTreeUtil
 import com.theboringdevelopers.lenter.feature.commentator.KDocGenerator
 import com.theboringdevelopers.lenter.ollama.OllamaClient
-import com.theboringdevelopers.lenter.settings.CommentatorSettingsState
+import com.theboringdevelopers.lenter.settings.states.LinterSettingsState
 import org.jetbrains.kotlin.psi.*
 
 class GenerateKDocForClassAction : AnAction(), DumbAware {
@@ -65,7 +65,7 @@ class GenerateKDocForClassAction : AnAction(), DumbAware {
         )
         if (ans != Messages.YES) return
 
-        val client = OllamaClient(CommentatorSettingsState.getInstance())
+        val client = OllamaClient(LinterSettingsState.getInstance())
 
         object : Task.Backgroundable(project, "Generating Comments for Class...", true) {
             private val results = mutableMapOf<KtDeclaration, String>()

@@ -8,7 +8,7 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.JBUI
 import com.theboringdevelopers.lenter.feature.jira.JiraCommentClient
-import com.theboringdevelopers.lenter.settings.JiraSettingsState
+import com.theboringdevelopers.lenter.settings.states.JiraSettingsState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
