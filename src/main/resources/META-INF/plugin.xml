@@ -31,6 +31,13 @@
         <li><b>Structured Output:</b> Includes environment, steps to reproduce, expected vs actual results</li>
     </ul>
 
+    <h4>🎨 Compose Color Preview</h4>
+    <ul>
+        <li><b>Inline PreviewColor:</b> Shows Compose color values directly in the editor gutter</li>
+        <li><b>Live Editing:</b> Tweak ARGB shades with an interactive color picker</li>
+        <li><b>Customizable Display:</b> Configure icon size, placement, and contrast indicators</li>
+    </ul>
+
     <h3>⌨️ Shortcuts</h3>
     <ul>
         <li><b>Ctrl+Alt+K</b> (⌘+⌥+K on Mac) - Generate comments for entire class</li>
