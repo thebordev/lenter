@@ -50,9 +50,14 @@ class Configurable : Configurable {
         val descriptor = FileChooserDescriptorFactory.createSingleFileDescriptor()
             .withTitle("Выберите local.properties")
             .withDescription("Выберите файл local.properties с настройками Jira")
-            .withFileFilter { it.name == "local.properties" || it.extension == "properties" }
+            .withFileFilter { it.name == "local.properties" || it.extension.equals("properties", true) }
 
-        addBrowseFolderListener(null, descriptor)
+        addBrowseFolderListener(
+            "Выберите local.properties",
+            "Выберите файл local.properties с настройками Jira",
+            /* project = */ null,
+            descriptor
+        )
     }
 
     private val jiraUrlField = JBTextField()
