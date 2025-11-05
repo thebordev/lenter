@@ -19,14 +19,15 @@ import com.theboringdevelopers.lenter.settings.states.PreviewSettingsState
 import java.net.URL
 import javax.swing.*
 
+/**
+ * Страница настроек плагина Lenter
+ */
 class Configurable : Configurable {
 
     private companion object {
         const val MIN_TIMEOUT = 10
         const val MAX_TIMEOUT = 600
-        const val MIN_ICON_SIZE = 8
-        const val MAX_ICON_SIZE = 24
-        const val DEFAULT_LABEL_WIDTH = 160
+        const val DEFAULT_LABEL_WIDTH = 180
     }
 
     private val ollamaSettings = LinterSettingsState.getInstance()
@@ -40,10 +41,8 @@ class Configurable : Configurable {
 
     // Preview Settings
     private val composeColorPreviewCheckBox = JBCheckBox("Включить предпросмотр цветов Compose")
-    private val showColorInGutterCheckBox = JBCheckBox("Показывать иконки цвета в gutter")
-    private val colorIconSizeSpinner = JBIntSpinner(12, MIN_ICON_SIZE, MAX_ICON_SIZE)
-    private val brushGradientPreviewCheckBox = JBCheckBox("Включить предпросмотр Brush градиентов")
-    private val gradientIconSizeSpinner = JBIntSpinner(12, MIN_ICON_SIZE, MAX_ICON_SIZE)
+    private val drawablePreviewInCodeCheckBox = JBCheckBox("Показывать preview drawable в коде (inline)")
+    private val drawablePreviewInTreeCheckBox = JBCheckBox("Показывать preview drawable в дереве файлов")
 
     // Jira Settings
     private val localPropertiesPathField = TextFieldWithBrowseButton().apply {
@@ -55,7 +54,7 @@ class Configurable : Configurable {
         addBrowseFolderListener(
             "Выберите local.properties",
             "Выберите файл local.properties с настройками Jira",
-            /* project = */ null,
+            null,
             descriptor
         )
     }
@@ -81,20 +80,9 @@ class Configurable : Configurable {
     }
 
     override fun isModified(): Boolean {
-        return apiUrlField.text.trim() != ollamaSettings.ollamaApiUrl ||
-                modelField.text.trim() != ollamaSettings.modelName ||
-                timeoutField.number != ollamaSettings.requestTimeoutSeconds ||
-
-                composeColorPreviewCheckBox.isSelected != previewSettings.composeColorPreviewEnabled ||
-
-                localPropertiesPathField.text.trim() != jiraSettings.localPropertiesPath ||
-                jiraUrlField.text.trim() != jiraSettings.jiraUrl ||
-                jiraUsernameField.text.trim() != jiraSettings.jiraUsername ||
-                !jiraApiTokenField.password.contentEquals(jiraSettings.jiraApiToken.toCharArray()) ||
-                jiraProjectIdField.text.trim() != jiraSettings.jiraProjectId ||
-                jiraProjectKeyField.text.trim() != jiraSettings.jiraProjectKey ||
-                jiraIssueTypeField.text.trim() != jiraSettings.jiraIssueType ||
-                jiraPriorityField.text.trim() != jiraSettings.jiraPriority
+        return isOllamaSettingsModified() ||
+                isPreviewSettingsModified() ||
+                isJiraSettingsModified()
     }
 
     @Throws(ConfigurationException::class)
@@ -105,23 +93,9 @@ class Configurable : Configurable {
     }
 
     override fun reset() {
-        // Ollama
-        apiUrlField.text = ollamaSettings.ollamaApiUrl
-        modelField.text = ollamaSettings.modelName
-        timeoutField.number = ollamaSettings.requestTimeoutSeconds
-
-        // Preview
-        composeColorPreviewCheckBox.isSelected = previewSettings.composeColorPreviewEnabled
-
-        // Jira
-        localPropertiesPathField.text = jiraSettings.localPropertiesPath
-        jiraUrlField.text = jiraSettings.jiraUrl
-        jiraUsernameField.text = jiraSettings.jiraUsername
-        jiraApiTokenField.text = jiraSettings.jiraApiToken
-        jiraProjectIdField.text = jiraSettings.jiraProjectId
-        jiraProjectKeyField.text = jiraSettings.jiraProjectKey
-        jiraIssueTypeField.text = jiraSettings.jiraIssueType
-        jiraPriorityField.text = jiraSettings.jiraPriority
+        resetOllamaSettings()
+        resetPreviewSettings()
+        resetJiraSettings()
     }
 
     override fun disposeUIResources() {
@@ -131,7 +105,15 @@ class Configurable : Configurable {
     override fun getDisplayName(): String = "Lenter"
 
     private fun createPanel(): JPanel = FormBuilder.createFormBuilder()
-        // Ollama Settings
+        .addOllamaSettingsSection()
+        .addSeparator()
+        .addPreviewSettingsSection()
+        .addSeparator()
+        .addJiraSettingsSection()
+        .addComponentFillVertically(JPanel(), 0)
+        .panel
+
+    private fun FormBuilder.addOllamaSettingsSection(): FormBuilder = this
         .addComponent(JBLabel("<html><b>Ollama Settings</b></html>"))
         .addVerticalGap(5)
         .addLabeledComponent("Ollama API URL:", apiUrlField, 1, false)
@@ -141,43 +123,23 @@ class Configurable : Configurable {
         .addLabeledComponent("Timeout (seconds):", timeoutField, 1, false)
         .addTooltip("Максимальное время ожидания ответа ($MIN_TIMEOUT-$MAX_TIMEOUT секунд)")
 
-        .addVerticalGap(20)
-        .addComponent(JSeparator())
-        .addVerticalGap(15)
-
-        // Preview Settings
-        .addComponent(JBLabel("<html><b>Preview</b></html>"))
+    private fun FormBuilder.addPreviewSettingsSection(): FormBuilder = this
+        .addComponent(JBLabel("<html><b>Preview Settings</b></html>"))
         .addVerticalGap(5)
-        .addComponent(JBLabel("<html><i>Настройки визуального отображения цветов и градиентов</i></html>").apply {
+        .addComponent(JBLabel("<html><i>Включение/выключение визуального предпросмотра</i></html>").apply {
             border = JBUI.Borders.emptyBottom(5)
         })
-
-        .addComponent(JBLabel("<html><b>Compose Color Preview:</b></html>").apply {
-            border = JBUI.Borders.emptyTop(5)
-        })
         .addComponent(composeColorPreviewCheckBox)
-        .addTooltip("Показывать квадраты с цветом для вызовов androidx.compose.ui.graphics.Color")
-        .addComponent(showColorInGutterCheckBox)
-        .addTooltip("Отображать иконки цвета на левой панели редактора")
-        .addLabeledComponent("Размер иконки цвета (px):", colorIconSizeSpinner, 1, false)
-        .addTooltip("Размер квадрата с цветом ($MIN_ICON_SIZE-$MAX_ICON_SIZE пикселей)")
-
-        .addVerticalGap(10)
-        .addComponent(JBLabel("<html><b>Brush Gradient Preview:</b></html>"))
-        .addComponent(brushGradientPreviewCheckBox)
-        .addTooltip("Показывать градиенты для Brush.horizontalGradient, Brush.verticalGradient и др.")
-        .addLabeledComponent("Размер иконки градиента (px):", gradientIconSizeSpinner, 1, false)
-        .addTooltip("Размер иконки с градиентом ($MIN_ICON_SIZE-$MAX_ICON_SIZE пикселей)")
-
+        .addTooltip("Показывать квадраты с цветом для androidx.compose.ui.graphics.Color")
+        .addComponent(drawablePreviewInCodeCheckBox)
+        .addTooltip("Показывать preview drawable рядом с painterResource() в коде")
+        .addComponent(drawablePreviewInTreeCheckBox)
+        .addTooltip("Показывать миниатюры drawable файлов в дереве проекта")
         .addComponent(JBLabel("<html><small><i>Изменения применятся после переоткрытия файлов</i></small></html>").apply {
             border = JBUI.Borders.emptyTop(10)
         })
 
-        .addVerticalGap(20)
-        .addComponent(JSeparator())
-        .addVerticalGap(15)
-
-        // Jira Settings
+    private fun FormBuilder.addJiraSettingsSection(): FormBuilder = this
         .addComponent(JBLabel("<html><b>Jira Settings</b></html>"))
         .addVerticalGap(5)
         .addComponent(createLocalPropertiesPanel())
@@ -198,8 +160,6 @@ class Configurable : Configurable {
         .addTooltip("ID типа задачи (например: 10101 = Bug, 10001 = Task)")
         .addLabeledComponent("Default Priority ID:", jiraPriorityField, 1, false)
         .addTooltip("ID приоритета (1 = Highest, 2 = High, 3 = Medium, 4 = Low, 5 = Lowest)")
-        .addComponentFillVertically(JPanel(), 0)
-        .panel
 
     private fun createLocalPropertiesPanel(): JPanel {
         val panel = JPanel()
@@ -262,17 +222,11 @@ class Configurable : Configurable {
 
     @Throws(ConfigurationException::class)
     private fun validateAndApplyPreviewSettings() {
-        val colorIconSize = colorIconSizeSpinner.number
-        if (colorIconSize !in MIN_ICON_SIZE..MAX_ICON_SIZE) {
-            throw ConfigurationException("Размер иконки цвета должен быть в диапазоне $MIN_ICON_SIZE-$MAX_ICON_SIZE пикселей")
+        previewSettings.apply {
+            composeColorPreviewEnabled = composeColorPreviewCheckBox.isSelected
+            drawablePreviewInCodeEnabled = drawablePreviewInCodeCheckBox.isSelected
+            drawablePreviewInTreeEnabled = drawablePreviewInTreeCheckBox.isSelected
         }
-
-        val gradientIconSize = gradientIconSizeSpinner.number
-        if (gradientIconSize !in MIN_ICON_SIZE..MAX_ICON_SIZE) {
-            throw ConfigurationException("Размер иконки градиента должен быть в диапазоне $MIN_ICON_SIZE-$MAX_ICON_SIZE пикселей")
-        }
-
-        previewSettings.composeColorPreviewEnabled = composeColorPreviewCheckBox.isSelected
     }
 
     @Throws(ConfigurationException::class)
@@ -291,15 +245,61 @@ class Configurable : Configurable {
         }
 
         jiraSettings.apply {
-            this.localPropertiesPath = localPropertiesPathField.text.trim()
+            localPropertiesPath = localPropertiesPathField.text.trim()
             this.jiraUrl = jiraUrl.trimEnd('/')
-            this.jiraUsername = jiraUsernameField.text.trim()
-            this.jiraApiToken = jiraToken
-            this.jiraProjectId = jiraProjectIdField.text.trim()
-            this.jiraProjectKey = jiraProjectKeyField.text.trim()
-            this.jiraIssueType = jiraIssueTypeField.text.trim()
-            this.jiraPriority = jiraPriorityField.text.trim()
+            jiraUsername = jiraUsernameField.text.trim()
+            jiraApiToken = jiraToken
+            jiraProjectId = jiraProjectIdField.text.trim()
+            jiraProjectKey = jiraProjectKeyField.text.trim()
+            jiraIssueType = jiraIssueTypeField.text.trim()
+            jiraPriority = jiraPriorityField.text.trim()
         }
+    }
+
+    private fun resetOllamaSettings() {
+        apiUrlField.text = ollamaSettings.ollamaApiUrl
+        modelField.text = ollamaSettings.modelName
+        timeoutField.number = ollamaSettings.requestTimeoutSeconds
+    }
+
+    private fun resetPreviewSettings() {
+        composeColorPreviewCheckBox.isSelected = previewSettings.composeColorPreviewEnabled
+        drawablePreviewInCodeCheckBox.isSelected = previewSettings.drawablePreviewInCodeEnabled
+        drawablePreviewInTreeCheckBox.isSelected = previewSettings.drawablePreviewInTreeEnabled
+    }
+
+    private fun resetJiraSettings() {
+        localPropertiesPathField.text = jiraSettings.localPropertiesPath
+        jiraUrlField.text = jiraSettings.jiraUrl
+        jiraUsernameField.text = jiraSettings.jiraUsername
+        jiraApiTokenField.text = jiraSettings.jiraApiToken
+        jiraProjectIdField.text = jiraSettings.jiraProjectId
+        jiraProjectKeyField.text = jiraSettings.jiraProjectKey
+        jiraIssueTypeField.text = jiraSettings.jiraIssueType
+        jiraPriorityField.text = jiraSettings.jiraPriority
+    }
+
+    private fun isOllamaSettingsModified(): Boolean {
+        return apiUrlField.text.trim() != ollamaSettings.ollamaApiUrl ||
+                modelField.text.trim() != ollamaSettings.modelName ||
+                timeoutField.number != ollamaSettings.requestTimeoutSeconds
+    }
+
+    private fun isPreviewSettingsModified(): Boolean {
+        return composeColorPreviewCheckBox.isSelected != previewSettings.composeColorPreviewEnabled ||
+                drawablePreviewInCodeCheckBox.isSelected != previewSettings.drawablePreviewInCodeEnabled ||
+                drawablePreviewInTreeCheckBox.isSelected != previewSettings.drawablePreviewInTreeEnabled
+    }
+
+    private fun isJiraSettingsModified(): Boolean {
+        return localPropertiesPathField.text.trim() != jiraSettings.localPropertiesPath ||
+                jiraUrlField.text.trim() != jiraSettings.jiraUrl ||
+                jiraUsernameField.text.trim() != jiraSettings.jiraUsername ||
+                !jiraApiTokenField.password.contentEquals(jiraSettings.jiraApiToken.toCharArray()) ||
+                jiraProjectIdField.text.trim() != jiraSettings.jiraProjectId ||
+                jiraProjectKeyField.text.trim() != jiraSettings.jiraProjectKey ||
+                jiraIssueTypeField.text.trim() != jiraSettings.jiraIssueType ||
+                jiraPriorityField.text.trim() != jiraSettings.jiraPriority
     }
 
     private fun isValidUrl(urlString: String): Boolean {

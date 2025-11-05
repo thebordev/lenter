@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.theboringdevelopers"
-version = "1.0.3"
+version = "1.0.4"
 
 repositories {
     mavenCentral()
@@ -32,6 +32,19 @@ intellijPlatform {
         }
 
         changeNotes = """
+            <h3>Version 1.0.4</h3>
+            <ul>
+                <li>🖼️ <b>Drawable Preview:</b> визуальный предпросмотр изображений в дереве проекта и inline в коде</li>
+                <li>✨ Поддержка resource функций: painterResource() и vectorResource()</li>
+                <li>✨ Поддержка Android Vector Drawable (XML) с полноценным рендерингом SVG path команд</li>
+                <li>🎯 Кросс-платформенная поддержка: Android (R.drawable.*) и Compose Multiplatform (Res.drawable.*)</li>
+                <li>⚡  Интеллектуальное кэширование с автоматической инвалидацией при изменении файлов</li>
+                <li>🎨 Поддержка форматов: PNG, JPG, JPEG, WebP, XML Vector Drawable</li>
+                <li>📍 Inline preview рядом с вызовами painterResource() и vectorResource()</li>
+                <li>⚙️ Гибкие настройки: включение/выключение preview в коде и дереве файлов раздельно</li>
+                <li>🚀 Оптимизированная производительность с SoftReference для экономии памяти</li>
+            </ul>
+
             <h3>Version 1.0.3</h3>
             <ul>
                 <li>ComposeResourceDeclarationHandler: быстрый переход к ресурсам Jetpack Compose по клику</li>

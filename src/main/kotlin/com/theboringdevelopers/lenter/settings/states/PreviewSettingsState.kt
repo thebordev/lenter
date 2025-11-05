@@ -13,6 +13,8 @@ import com.intellij.util.xmlb.XmlSerializerUtil
 class PreviewSettingsState : PersistentStateComponent<PreviewSettingsState> {
 
     var composeColorPreviewEnabled: Boolean = true
+    var drawablePreviewInCodeEnabled: Boolean = true
+    var drawablePreviewInTreeEnabled: Boolean = true
 
     override fun getState(): PreviewSettingsState = this
 

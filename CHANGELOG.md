@@ -2,6 +2,18 @@
 
 Все заметные изменения в проекте будут фиксироваться в этом файле.
 
+## [1.0.4] - 2025-11-05
+### 🖼️ Добавлено - Drawable Preview
+- **Visual File Icons:** Миниатюры drawable изображений в дереве проекта (Project View)
+- **Inline Code Preview:** Preview рядом с вызовами `painterResource()` в коде
+- **Android Vector Drawable Support:** Полноценный рендеринг XML векторной графики
+    - Поддержка SVG path команд: M (MoveTo), L (LineTo), H (Horizontal), V (Vertical), C (CubicBezier), Z (ClosePath)
+    - Корректная обработка fillColor, strokeColor, strokeWidth, tint
+    - Масштабирование с сохранением пропорций (viewport → target size)
+- **Multi-Format Support:** PNG, JPG, JPEG, WebP, XML Vector Drawable
+- **Cross-Platform:** Android (`R.drawable.*`) и Compose Multiplatform (`Res.drawable.*`)
+- **Smart Resource Lookup:** Приоритетный поиск в `composeResources/drawable` и `res/drawable`
+
 ## [1.0.3] - 2025-11-12
 ### Добавлено
 - `ComposeResourceDeclarationHandler` для быстрого перехода к декларациям ресурсов Jetpack Compose из места использования.

@@ -2,7 +2,8 @@
 <idea-plugin>
     <id>com.theboringdevelopers.commentator</id>
     <name>Lenter</name>
-    <vendor email="support@theboringdevelopers.com" url="https://github.com/theboringdevelopers">The Boring Developers
+    <vendor email="support@theboringdevelopers.com" url="https://github.com/theboringdevelopers">
+        The Boring Developers
     </vendor>
 
     <description><![CDATA[
@@ -33,9 +34,18 @@
 
     <h4>🎨 Compose Color Preview</h4>
     <ul>
-        <li><b>Inline PreviewColor:</b> Shows Compose color values directly in the editor gutter</li>
+        <li><b>Inline Preview:</b> Shows Compose color values directly in the editor gutter</li>
         <li><b>Live Editing:</b> Tweak ARGB shades with an interactive color picker</li>
         <li><b>Customizable Display:</b> Configure icon size, placement, and contrast indicators</li>
+    </ul>
+
+    <h4>🖼️ Drawable Preview</h4>
+    <ul>
+        <li><b>Visual File Icons:</b> See drawable previews directly in the project tree</li>
+        <li><b>Inline Code Preview:</b> Preview images next to painterResource() calls</li>
+        <li><b>Multi-Format Support:</b> PNG, JPG, WebP, and Android Vector Drawable (XML)</li>
+        <li><b>Smart Caching:</b> Fast loading with automatic cache invalidation</li>
+        <li><b>Cross-Platform:</b> Works with Android (R.drawable.*) and Compose Multiplatform (Res.drawable.*)</li>
     </ul>
 
     <h4>🧭 Compose Resource Navigation (KMP/CMP)</h4>
@@ -48,7 +58,8 @@
     <h3>⌨️ Shortcuts</h3>
     <ul>
         <li><b>Ctrl+Alt+K</b> (⌘+⌥+K on Mac) - Generate comments for entire class</li>
-        <li><b>Ctrl+Alt+B</b> - Open bug report generator</li>
+        <li><b>Ctrl+Alt+Shift+B</b> (⌘+⌥+⇧+B on Mac) - Open bug report generator</li>
+        <li><b>Ctrl+Alt+Shift+C</b> (⌘+⌥+⇧+C on Mac) - Add comment to Jira issue</li>
     </ul>
 
     <h3>🚀 Quick Start</h3>
@@ -56,7 +67,7 @@
         <li>Install <a href="https://ollama.ai/">Ollama</a> and download a model:
             <pre>ollama pull qwen2.5-coder:7b</pre>
         </li>
-        <li>Configure plugin: <b>Settings → Tools → Lenter Settings</b>
+        <li>Configure plugin: <b>Settings → Tools → Lenter</b>
             <ul>
                 <li>Ollama API URL: <code>http://localhost:11434</code></li>
                 <li>Model: <code>qwen2.5-coder:7b</code></li>
@@ -92,6 +103,8 @@
         <li>Speed up code reviews with proper documentation</li>
         <li>Create detailed bug reports without manual formatting</li>
         <li>Streamline QA workflow with Jira integration</li>
+        <li>Quickly identify drawable resources in large projects</li>
+        <li>Preview UI assets without opening separate viewers</li>
     </ul>
 
     <h3>🛠️ Requirements</h3>
@@ -111,6 +124,17 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <h3>Version 1.0.4</h3>
+    <ul>
+        <li>🖼️ Drawable Preview: визуальный предпросмотр изображений в дереве проекта и коде</li>
+        <li>✨ Поддержка Android Vector Drawable (XML) с умным рендерингом путей</li>
+        <li>🎯 Работает с Android (R.drawable.*) и Compose Multiplatform (Res.drawable.*)</li>
+        <li>⚡ Интеллектуальное кэширование с автоматической инвалидацией</li>
+        <li>🎨 Поддержка форматов: PNG, JPG, JPEG, WebP, XML Vector Drawable</li>
+        <li>📍 Inline preview рядом с painterResource() вызовами</li>
+        <li>⚙️ Гибкие настройки для включения/выключения функций preview</li>
+    </ul>
+
     <h3>Version 1.0.3</h3>
     <ul>
         <li>ComposeResourceDeclarationHandler: быстрый переход к ресурсам Jetpack Compose из места использования</li>
@@ -140,16 +164,6 @@
         <li>Confluence Wiki Markup formatting for Jira</li>
         <li>Personal Access Token authentication</li>
     </ul>
-
-    <h3>Features</h3>
-    <ul>
-        <li>✅ Russian language documentation support</li>
-        <li>✅ Smart @property, @param, @return detection</li>
-        <li>✅ Customizable Ollama model selection</li>
-        <li>✅ Configurable request timeout</li>
-        <li>✅ Progress indicators for long operations</li>
-        <li>✅ Error handling with detailed messages</li>
-    </ul>
     ]]></change-notes>
 
     <!-- Базовые зависимости -->
@@ -177,25 +191,39 @@
         <applicationService
                 serviceImplementation="com.theboringdevelopers.lenter.settings.states.PreviewSettingsState"/>
 
-        <colorProvider implementation="com.theboringdevelopers.lenter.feature.colors.ComposeColorProvider"/>
+        <!-- Color Provider для Compose -->
+        <colorProvider
+                implementation="com.theboringdevelopers.lenter.feature.colors.ComposeColorProvider"/>
+
+        <!-- Resource Navigation Handler -->
         <gotoDeclarationHandler
                 implementation="com.theboringdevelopers.lenter.feature.resources.ComposeResourceDeclarationHandler"/>
+
+        <!-- Drawable Preview в дереве файлов -->
+        <iconProvider
+                implementation="com.theboringdevelopers.lenter.feature.preview.DrawableFileIconProvider"
+                order="first"/>
+
+        <!-- Drawable Preview в коде (inline hints) -->
+        <codeInsight.inlayProvider
+                language="kotlin"
+                implementationClass="com.theboringdevelopers.lenter.feature.preview.DrawableInlinePreviewProvider"/>
     </extensions>
 
     <!-- Действия и хоткеи -->
     <actions>
+        <!-- KDoc Generation -->
         <action id="Commentator.GenerateKDoc"
                 class="com.theboringdevelopers.lenter.actions.GenerateKDocForClassAction"
                 text="Lenter: Generate KDoc for Class"
                 description="Generate KDoc comments for entire Kotlin class and its members">
-            <!-- дефолтный хоткей для всех -->
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt K"/>
-            <!-- хоткей для macOS -->
             <keyboard-shortcut keymap="Mac OS X" first-keystroke="meta alt K"/>
             <add-to-group group-id="CodeMenu" anchor="last"/>
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </action>
 
+        <!-- Bug Report Generator -->
         <action id="Commentator.GenerateBugReport"
                 class="com.theboringdevelopers.lenter.actions.GenerateBugReportAction"
                 text="Lenter: Generate Bug Report"
@@ -205,6 +233,8 @@
             <keyboard-shortcut keymap="Mac OS X" first-keystroke="meta alt shift B"/>
             <keyboard-shortcut keymap="macOS" first-keystroke="meta alt shift B"/>
         </action>
+
+        <!-- Add Jira Comment -->
         <action id="Commentator.AddJiraComment"
                 class="com.theboringdevelopers.lenter.actions.AddJiraCommentAction"
                 text="Lenter: Add Comment to Jira"
