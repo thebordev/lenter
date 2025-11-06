@@ -62,17 +62,17 @@
 @Composable
 fun WelcomeScreen() {
     // При выборе "Русский (values-ru)" в настройках:
-    Text(stringResource(Res.string.app_name))        // ┌─────────────────────┐
+    Text(stringResource(Res.string.app_name))         // ┌─────────────────────┐
                                                       // │ Моё приложение      │
                                                       // └─────────────────────┘
     
     // При выборе "Английский (values-en)":
-    Text(stringResource(R.string.welcome))           // ┌─────────────────────┐
+    Text(stringResource(R.string.welcome))            // ┌─────────────────────┐
                                                       // │ Welcome to our app  │
                                                       // └─────────────────────┘
     
     // Если строки нет на выбранном языке - fallback на default:
-    Text(stringResource(Res.string.only_english))    // ┌──────────────────────────┐
+    Text(stringResource(Res.string.only_english))     // ┌──────────────────────────┐
                                                       // │ Only English [default]   │
                                                       // └──────────────────────────┘
 }
