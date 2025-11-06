@@ -16,6 +16,33 @@ class ComposeColorProvider : ElementColorProvider {
             return null
         }
 
+        getColorFromHexLiteral(element)?.let { return it }
+
+        getColorFromPredefinedConstant(element)?.let { return it }
+
+        return null
+    }
+
+    override fun setColorTo(element: PsiElement, color: Color) {
+        if (!PreviewSettingsState.getInstance().composeColorPreviewEnabled) {
+            return
+        }
+
+        if (element is KtConstantExpression && element.text.matches(HEX_LITERAL_REGEX)) {
+            setHexLiteralColor(element, color)
+            return
+        }
+
+        if (element is KtNameReferenceExpression) {
+            replacePredefinedColorWithHex(element, color)
+            return
+        }
+    }
+
+    /**
+     * Получить цвет из hex-литерала (0xFFFF0000)
+     */
+    private fun getColorFromHexLiteral(element: PsiElement): Color? {
         if (element !is KtConstantExpression) return null
 
         val text = element.text
@@ -31,12 +58,44 @@ class ComposeColorProvider : ElementColorProvider {
         return text.parseComposeHexColor()
     }
 
-    override fun setColorTo(element: PsiElement, color: Color) {
-        if (!PreviewSettingsState.getInstance().composeColorPreviewEnabled) {
-            return
-        }
+    /**
+     * Получить цвет из предопределенной константы (Color.Red, Red и т.д.)
+     */
+    private fun getColorFromPredefinedConstant(element: PsiElement): Color? {
+        val colorName = when (element) {
+            is KtNameReferenceExpression -> {
+                val parent = element.parent
+                if (parent is KtDotQualifiedExpression) {
+                    val receiver = parent.receiverExpression
+                    if (receiver.text == "Color") {
+                        element.getReferencedName()
+                    } else {
+                        null
+                    }
+                } else {
+                    element.getReferencedName()
+                }
+            }
 
-        if (element !is KtConstantExpression) return
+            is KtSimpleNameExpression -> {
+                val parent = element.parent
+                if (parent is KtDotQualifiedExpression && element == parent.receiverExpression) {
+                    null
+                } else {
+                    element.getReferencedName()
+                }
+            }
+
+            else -> null
+        } ?: return null
+
+        return PREDEFINED_COMPOSE_COLORS[colorName]
+    }
+
+    /**
+     * Изменить hex-литерал
+     */
+    private fun setHexLiteralColor(element: KtConstantExpression, color: Color) {
         if (!element.isValid) return
 
         val project = element.project
@@ -54,9 +113,58 @@ class ComposeColorProvider : ElementColorProvider {
 
         WriteCommandAction.runWriteCommandAction(project, "Change Compose Color", null, {
             document.replaceString(textRange.startOffset, textRange.endOffset, newColorHex)
-
             psiDocumentManager.commitDocument(document)
         })
+    }
+
+    /**
+     * Заменить предопределенную константу на hex-литерал
+     */
+    private fun replacePredefinedColorWithHex(element: KtNameReferenceExpression, color: Color) {
+        if (!element.isValid) return
+
+        val project = element.project
+        val containingFile = element.containingFile
+        val psiDocumentManager = PsiDocumentManager.getInstance(project)
+        val document = psiDocumentManager.getDocument(containingFile) ?: return
+
+        val (startOffset, endOffset) = when (val parent = element.parent) {
+            is KtDotQualifiedExpression -> {
+                parent.textRange.startOffset to parent.textRange.endOffset
+            }
+
+            else -> {
+                element.textRange.startOffset to element.textRange.endOffset
+            }
+        }
+
+        val newColorCode = "Color(${color.toComposeHexLiteral()})"
+
+        WriteCommandAction.runWriteCommandAction(project, "Change Compose Color", null, {
+            document.replaceString(startOffset, endOffset, newColorCode)
+            psiDocumentManager.commitDocument(document)
+        })
+    }
+
+    companion object {
+        /**
+         * Предопределенные цвета Compose
+         */
+        private val PREDEFINED_COMPOSE_COLORS = mapOf(
+            "Red" to Color(0xFF, 0x00, 0x00),
+            "Green" to Color(0x00, 0xFF, 0x00),
+            "Blue" to Color(0x00, 0x00, 0xFF),
+            "Yellow" to Color(0xFF, 0xFF, 0x00),
+            "Cyan" to Color(0x00, 0xFF, 0xFF),
+            "Magenta" to Color(0xFF, 0x00, 0xFF),
+            "White" to Color(0xFF, 0xFF, 0xFF),
+            "Black" to Color(0x00, 0x00, 0x00),
+            "Gray" to Color(0x88, 0x88, 0x88),
+            "LightGray" to Color(0xCC, 0xCC, 0xCC),
+            "DarkGray" to Color(0x44, 0x44, 0x44),
+            "Transparent" to Color(0x00, 0x00, 0x00, 0x00),
+            "Unspecified" to Color(0x00, 0x00, 0x00, 0x00)
+        )
     }
 }
 

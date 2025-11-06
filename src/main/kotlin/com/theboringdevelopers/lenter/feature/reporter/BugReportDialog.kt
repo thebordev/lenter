@@ -249,10 +249,8 @@ class BugReportDialog(private val project: Project) : DialogWrapper(project) {
                     is OllamaClient.Result.Success -> {
                         val bugReport = bugReportGenerator.parseBugReport(result.text)
                         if (bugReport != null) {
-                            // Заполняем поля
                             fillFields(bugReport, description)
 
-                            // Обновляем preview
                             updatePreview()
 
                             updatePreviewButton.isEnabled = true

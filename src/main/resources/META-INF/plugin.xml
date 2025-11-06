@@ -48,6 +48,16 @@
         <li><b>Cross-Platform:</b> Works with Android (R.drawable.*) and Compose Multiplatform (Res.drawable.*)</li>
     </ul>
 
+    <h4>📝 String Resource Preview</h4>
+    <ul>
+        <li><b>Inline String Preview:</b> Shows string resource content directly in code</li>
+        <li><b>Multi-Language Support:</b> 10+ languages with automatic fallback</li>
+        <li><b>Configurable Language:</b> Choose preferred language in Settings</li>
+        <li><b>Beautiful UI:</b> Rounded corners with theme-adaptive colors</li>
+        <li><b>Smart Caching:</b> Fast performance with intelligent caching</li>
+        <li><b>Cross-Platform:</b> Works with Android (R.string.*) and Compose Multiplatform (Res.string.*)</li>
+    </ul>
+
     <h4>🧭 Compose Resource Navigation (KMP/CMP)</h4>
     <ul>
         <li><b>Go To Declaration:</b> Jump from Compose resource usages to their declarations with one shortcut</li>
@@ -124,6 +134,18 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <h3>Version 1.0.5</h3>
+    <ul>
+        <li>📝 <b>String Resource Preview:</b> отображение содержимого строковых ресурсов inline в коде</li>
+        <li>🌍 Поддержка 10+ языков: default, ru, en, de, fr, es, it, pt, ja, zh</li>
+        <li>⚙️ Настраиваемый приоритетный язык с автоматическим fallback на default</li>
+        <li>🎨 Красивое оформление с адаптацией к светлой и темной теме</li>
+        <li>🎨 <b>Color Preview:</b> поддержка предопределенных цветов (Color.Red, Color.Blue и т.д.)</li>
+        <li>🖼️ <b>Drawable Preview:</b> поддержка vectorResource() наравне с painterResource()</li>
+        <li>⚡ Интеллектуальное кэширование строковых ресурсов для быстрой работы</li>
+        <li>🔧 Множество мелких улучшений и исправлений</li>
+    </ul>
+
     <h3>Version 1.0.4</h3>
     <ul>
         <li>🖼️ Drawable Preview: визуальный предпросмотр изображений в дереве проекта и коде</li>
@@ -208,6 +230,11 @@
         <codeInsight.inlayProvider
                 language="kotlin"
                 implementationClass="com.theboringdevelopers.lenter.feature.preview.DrawableInlinePreviewProvider"/>
+        <!-- String Resource Preview в коде (inline hints) -->
+        <codeInsight.inlayProvider
+                language="kotlin"
+                implementationClass="com.theboringdevelopers.lenter.feature.preview.string.StringResourceInlayProvider"/>
+
     </extensions>
 
     <!-- Действия и хоткеи -->

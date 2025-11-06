@@ -44,6 +44,28 @@ class Configurable : Configurable {
     private val drawablePreviewInCodeCheckBox = JBCheckBox("Показывать preview drawable в коде (inline)")
     private val drawablePreviewInTreeCheckBox = JBCheckBox("Показывать preview drawable в дереве файлов")
 
+    // String Resource Preview
+    private val stringResourcePreviewCheckBox = JBCheckBox("Показывать preview строковых ресурсов")
+    private val stringLanguageComboBox = JComboBox<LanguageOption>().apply {
+        addItem(LanguageOption("default", "По умолчанию (values)"))
+        addItem(LanguageOption("ru", "Русский (values-ru)"))
+        addItem(LanguageOption("en", "Английский (values-en)"))
+        addItem(LanguageOption("de", "Немецкий (values-de)"))
+        addItem(LanguageOption("fr", "Французский (values-fr)"))
+        addItem(LanguageOption("es", "Испанский (values-es)"))
+        addItem(LanguageOption("it", "Итальянский (values-it)"))
+        addItem(LanguageOption("pt", "Португальский (values-pt)"))
+        addItem(LanguageOption("ja", "Японский (values-ja)"))
+        addItem(LanguageOption("zh", "Китайский (values-zh)"))
+    }
+
+    private data class LanguageOption(
+        val code: String,
+        val displayName: String,
+    ) {
+        override fun toString() = displayName
+    }
+
     // Jira Settings
     private val localPropertiesPathField = TextFieldWithBrowseButton().apply {
         val descriptor = FileChooserDescriptorFactory.createSingleFileDescriptor()
@@ -76,6 +98,7 @@ class Configurable : Configurable {
 
     override fun createComponent(): JComponent {
         reset()
+        setupListeners()
         return panel
     }
 
@@ -104,6 +127,8 @@ class Configurable : Configurable {
 
     override fun getDisplayName(): String = "Lenter"
 
+    // ==================== UI Creation ====================
+
     private fun createPanel(): JPanel = FormBuilder.createFormBuilder()
         .addOllamaSettingsSection()
         .addSeparator()
@@ -131,10 +156,21 @@ class Configurable : Configurable {
         })
         .addComponent(composeColorPreviewCheckBox)
         .addTooltip("Показывать квадраты с цветом для androidx.compose.ui.graphics.Color")
+
+        .addVerticalGap(10)
+        .addComponent(JBLabel("<html><b>Drawable Preview:</b></html>"))
         .addComponent(drawablePreviewInCodeCheckBox)
-        .addTooltip("Показывать preview drawable рядом с painterResource() в коде")
+        .addTooltip("Показывать preview drawable рядом с painterResource() и vectorResource() в коде")
         .addComponent(drawablePreviewInTreeCheckBox)
         .addTooltip("Показывать миниатюры drawable файлов в дереве проекта")
+
+        .addVerticalGap(10)
+        .addComponent(JBLabel("<html><b>String Resource Preview:</b></html>"))
+        .addComponent(stringResourcePreviewCheckBox)
+        .addTooltip("Показывать содержимое строковых ресурсов inline в коде")
+        .addLabeledComponent("Приоритетный язык:", stringLanguageComboBox, 1, false)
+        .addTooltip("Язык для отображения строк (используется fallback на default при отсутствии)")
+
         .addComponent(JBLabel("<html><small><i>Изменения применятся после переоткрытия файлов</i></small></html>").apply {
             border = JBUI.Borders.emptyTop(10)
         })
@@ -194,6 +230,12 @@ class Configurable : Configurable {
         border = JBUI.Borders.empty(5, DEFAULT_LABEL_WIDTH, 0, 0)
     }
 
+    private fun setupListeners() {
+        stringResourcePreviewCheckBox.addActionListener {
+            stringLanguageComboBox.isEnabled = stringResourcePreviewCheckBox.isSelected
+        }
+    }
+
     @Throws(ConfigurationException::class)
     private fun validateAndApplyOllamaSettings() {
         val timeout = timeoutField.number
@@ -222,10 +264,15 @@ class Configurable : Configurable {
 
     @Throws(ConfigurationException::class)
     private fun validateAndApplyPreviewSettings() {
+        val selectedLanguage = (stringLanguageComboBox.selectedItem as? LanguageOption)?.code ?: "default"
+
         previewSettings.apply {
             composeColorPreviewEnabled = composeColorPreviewCheckBox.isSelected
             drawablePreviewInCodeEnabled = drawablePreviewInCodeCheckBox.isSelected
             drawablePreviewInTreeEnabled = drawablePreviewInTreeCheckBox.isSelected
+
+            stringResourcePreviewEnabled = stringResourcePreviewCheckBox.isSelected
+            stringResourcePreferredLanguage = selectedLanguage
         }
     }
 
@@ -256,6 +303,8 @@ class Configurable : Configurable {
         }
     }
 
+    // ==================== Reset ====================
+
     private fun resetOllamaSettings() {
         apiUrlField.text = ollamaSettings.ollamaApiUrl
         modelField.text = ollamaSettings.modelName
@@ -266,6 +315,21 @@ class Configurable : Configurable {
         composeColorPreviewCheckBox.isSelected = previewSettings.composeColorPreviewEnabled
         drawablePreviewInCodeCheckBox.isSelected = previewSettings.drawablePreviewInCodeEnabled
         drawablePreviewInTreeCheckBox.isSelected = previewSettings.drawablePreviewInTreeEnabled
+
+        stringResourcePreviewCheckBox.isSelected = previewSettings.stringResourcePreviewEnabled
+
+        // Установить выбранный язык
+        val languageCode = previewSettings.stringResourcePreferredLanguage
+        for (i in 0 until stringLanguageComboBox.itemCount) {
+            val item = stringLanguageComboBox.getItemAt(i)
+            if (item.code == languageCode) {
+                stringLanguageComboBox.selectedIndex = i
+                break
+            }
+        }
+
+        // Обновить enabled состояние
+        stringLanguageComboBox.isEnabled = stringResourcePreviewCheckBox.isSelected
     }
 
     private fun resetJiraSettings() {
@@ -286,9 +350,13 @@ class Configurable : Configurable {
     }
 
     private fun isPreviewSettingsModified(): Boolean {
+        val selectedLanguage = (stringLanguageComboBox.selectedItem as? LanguageOption)?.code ?: "default"
+
         return composeColorPreviewCheckBox.isSelected != previewSettings.composeColorPreviewEnabled ||
                 drawablePreviewInCodeCheckBox.isSelected != previewSettings.drawablePreviewInCodeEnabled ||
-                drawablePreviewInTreeCheckBox.isSelected != previewSettings.drawablePreviewInTreeEnabled
+                drawablePreviewInTreeCheckBox.isSelected != previewSettings.drawablePreviewInTreeEnabled ||
+                stringResourcePreviewCheckBox.isSelected != previewSettings.stringResourcePreviewEnabled ||
+                selectedLanguage != previewSettings.stringResourcePreferredLanguage
     }
 
     private fun isJiraSettingsModified(): Boolean {

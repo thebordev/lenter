@@ -47,6 +47,37 @@
 ### 🖼️ Drawable Preview
 Визуальный предпросмотр drawable ресурсов прямо в IDE:
 
+### 📝 String Resource Preview
+Визуальный предпросмотр строковых ресурсов прямо в коде:
+
+#### Основные возможности
+- Preview содержимого строк рядом с вызовами `stringResource()`
+- Поддержка множества языков с автоматическим fallback
+- Настраиваемый приоритетный язык в Settings
+- Красивое оформление с адаптацией к теме IDE
+
+#### Поддерживаемые языки
+```kotlin
+// Settings → Tools → Lenter → Preview Settings → Приоритетный язык
+@Composable
+fun WelcomeScreen() {
+    // При выборе "Русский (values-ru)" в настройках:
+    Text(stringResource(Res.string.app_name))        // ┌─────────────────────┐
+                                                      // │ Моё приложение      │
+                                                      // └─────────────────────┘
+    
+    // При выборе "Английский (values-en)":
+    Text(stringResource(R.string.welcome))           // ┌─────────────────────┐
+                                                      // │ Welcome to our app  │
+                                                      // └─────────────────────┘
+    
+    // Если строки нет на выбранном языке - fallback на default:
+    Text(stringResource(Res.string.only_english))    // ┌──────────────────────────┐
+                                                      // │ Only English [default]   │
+                                                      // └──────────────────────────┘
+}
+```
+
 #### В дереве файлов
 - Миниатюры изображений вместо стандартных иконок файлов
 - Автоматическое распознавание drawable директорий (Android и Compose Multiplatform)
