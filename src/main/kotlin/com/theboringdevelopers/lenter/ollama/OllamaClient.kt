@@ -6,7 +6,7 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
-import java.net.URL
+import java.net.URI
 
 class OllamaClient(
     private val settings: LinterSettingsState,
@@ -19,7 +19,7 @@ class OllamaClient(
         val timeoutSeconds = settings.requestTimeoutSeconds.coerceAtLeast(10)
 
         return try {
-            val url = URL("$baseUrl/api/generate")
+            val url = URI.create("$baseUrl/api/generate").toURL()
             val connection = url.openConnection() as HttpURLConnection
 
             connection.requestMethod = "POST"

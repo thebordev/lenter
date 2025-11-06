@@ -4,7 +4,7 @@ import com.theboringdevelopers.lenter.settings.states.JiraSettingsState
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.net.HttpURLConnection
-import java.net.URL
+import java.net.URI
 
 class JiraClient(private val settings: JiraSettingsState) {
 
@@ -72,7 +72,7 @@ class JiraClient(private val settings: JiraSettingsState) {
             println("Body: $requestBody")
             println("===================")
 
-            val url = URL("${settings.jiraUrl.trimEnd('/')}/rest/api/2/issue")
+            val url = URI.create("${settings.jiraUrl.trimEnd('/')}/rest/api/2/issue").toURL()
             val connection = url.openConnection() as HttpURLConnection
 
             connection.requestMethod = "POST"

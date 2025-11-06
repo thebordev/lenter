@@ -22,6 +22,10 @@ class PreviewSettingsState : PersistentStateComponent<PreviewSettingsState> {
     var drawablePreviewInCodeEnabled: Boolean = true
     var drawablePreviewInTreeEnabled: Boolean = true
 
+    // Vector Drawable Editor Preview
+    var vectorDrawableEditorPreviewEnabled: Boolean = true
+    var vectorDrawablePreviewSize: Int = 256
+
     // String Resource Preview
     var stringResourcePreviewEnabled: Boolean = true
     var stringResourcePreferredLanguage: String = "default"

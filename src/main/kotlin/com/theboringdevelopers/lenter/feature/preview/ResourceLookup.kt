@@ -28,7 +28,7 @@ object ResourceLookup {
         val candidates = buildList {
             SUPPORTED_EXTENSIONS.forEach { ext ->
                 val fileName = "$name.$ext"
-                addAll(FilenameIndex.getVirtualFilesByName(project, fileName, scope))
+                addAll(FilenameIndex.getVirtualFilesByName(fileName, scope))
             }
         }
 

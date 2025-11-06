@@ -59,7 +59,7 @@ class ComposeResourceDeclarationHandler : GotoDeclarationHandler {
     private fun findStringResourceTags(project: Project, resourceName: String): List<LocalizedStringTarget> {
         val scope = GlobalSearchScope.projectScope(project)
         val matchingVFiles = FilenameIndex
-            .getVirtualFilesByName(project, STRINGS_XML, scope)
+            .getVirtualFilesByName(STRINGS_XML, scope)
             .asSequence()
             .filter { it.isComposeStringsFile() }
             .toList()
@@ -93,7 +93,7 @@ class ComposeResourceDeclarationHandler : GotoDeclarationHandler {
         val results = ArrayList<DrawableTarget>()
         for (ext in DRAWABLE_FILE_EXTS) {
             val fileName = "$resourceName.$ext"
-            val vFiles = FilenameIndex.getVirtualFilesByName(project, fileName, scope)
+            val vFiles = FilenameIndex.getVirtualFilesByName(fileName, scope)
                 .asSequence()
                 .filter { it.isComposeDrawableFile() }
                 .toList()

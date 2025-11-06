@@ -157,7 +157,7 @@ private object PathParser {
                 nextIndex = startIndex + 1
             }
 
-            else -> nextIndex = startIndex + 1 // Пропускаем неизвестные команды
+            else -> nextIndex = startIndex + 1
         }
 
         updatePosition(newX, newY)

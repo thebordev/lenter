@@ -45,15 +45,21 @@ class JiraSettingsState : PersistentStateComponent<JiraSettingsState.State> {
 
     var localPropertiesPath: String
         get() = myState.localPropertiesPath
-        set(value) { myState.localPropertiesPath = value }
+        set(value) {
+            myState.localPropertiesPath = value
+        }
 
     var jiraUrl: String
         get() = myState.jiraUrl
-        set(value) { myState.jiraUrl = value }
+        set(value) {
+            myState.jiraUrl = value
+        }
 
     var jiraUsername: String
         get() = myState.jiraUsername
-        set(value) { myState.jiraUsername = value }
+        set(value) {
+            myState.jiraUsername = value
+        }
 
     var jiraApiToken: String
         get() = getTokenFromPasswordSafe() ?: ""
@@ -61,19 +67,27 @@ class JiraSettingsState : PersistentStateComponent<JiraSettingsState.State> {
 
     var jiraProjectId: String
         get() = myState.jiraProjectId
-        set(value) { myState.jiraProjectId = value }
+        set(value) {
+            myState.jiraProjectId = value
+        }
 
     var jiraProjectKey: String
         get() = myState.jiraProjectKey
-        set(value) { myState.jiraProjectKey = value }
+        set(value) {
+            myState.jiraProjectKey = value
+        }
 
     var jiraIssueType: String
         get() = myState.jiraIssueType
-        set(value) { myState.jiraIssueType = value }
+        set(value) {
+            myState.jiraIssueType = value
+        }
 
     var jiraPriority: String
         get() = myState.jiraPriority
-        set(value) { myState.jiraPriority = value }
+        set(value) {
+            myState.jiraPriority = value
+        }
 
     override fun getState(): State = myState.copy()
 
@@ -128,7 +142,7 @@ class JiraSettingsState : PersistentStateComponent<JiraSettingsState.State> {
 
     private fun getTokenFromPasswordSafe(): String? {
         val credentialAttributes = createCredentialAttributes()
-        return PasswordSafe.Companion.instance.getPassword(credentialAttributes)
+        return PasswordSafe.instance.getPassword(credentialAttributes)
     }
 
     private fun saveTokenToPasswordSafe(token: String) {
@@ -138,14 +152,11 @@ class JiraSettingsState : PersistentStateComponent<JiraSettingsState.State> {
         } else {
             null
         }
-        PasswordSafe.Companion.instance.set(credentialAttributes, credentials)
+        PasswordSafe.instance.set(credentialAttributes, credentials)
     }
 
     private fun createCredentialAttributes(): CredentialAttributes {
-        return CredentialAttributes(
-            generateServiceName("Lenter", JIRA_TOKEN_KEY),
-            jiraUsername.takeIf { it.isNotBlank() } ?: "jira-user"
-        )
+        return CredentialAttributes(generateServiceName("Lenter", JIRA_TOKEN_KEY))
     }
 
     private fun Properties.findFirstNonBlank(vararg keys: String): String? = keys

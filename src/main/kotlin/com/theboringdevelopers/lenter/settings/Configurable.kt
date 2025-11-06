@@ -1,6 +1,7 @@
 package com.theboringdevelopers.lenter.settings
 
-import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
+import com.intellij.openapi.fileChooser.FileChooser
+import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.options.ConfigurationException
 import com.intellij.openapi.ui.Messages
@@ -16,7 +17,7 @@ import com.intellij.util.ui.JBUI
 import com.theboringdevelopers.lenter.settings.states.JiraSettingsState
 import com.theboringdevelopers.lenter.settings.states.LinterSettingsState
 import com.theboringdevelopers.lenter.settings.states.PreviewSettingsState
-import java.net.URL
+import java.net.URI
 import javax.swing.*
 
 /**
@@ -27,6 +28,8 @@ class Configurable : Configurable {
     private companion object {
         const val MIN_TIMEOUT = 10
         const val MAX_TIMEOUT = 600
+        const val MIN_VECTOR_SIZE = 64
+        const val MAX_VECTOR_SIZE = 1024
         const val DEFAULT_LABEL_WIDTH = 180
     }
 
@@ -39,12 +42,18 @@ class Configurable : Configurable {
     private val modelField = JBTextField()
     private val timeoutField = JBIntSpinner(MIN_TIMEOUT, MIN_TIMEOUT, MAX_TIMEOUT)
 
-    // Preview Settings
+    // Preview Settings - Color
     private val composeColorPreviewCheckBox = JBCheckBox("Включить предпросмотр цветов Compose")
+
+    // Preview Settings - Drawable
     private val drawablePreviewInCodeCheckBox = JBCheckBox("Показывать preview drawable в коде (inline)")
     private val drawablePreviewInTreeCheckBox = JBCheckBox("Показывать preview drawable в дереве файлов")
 
-    // String Resource Preview
+    // Preview Settings - Vector Drawable Editor
+    private val vectorEditorPreviewCheckBox = JBCheckBox("Показывать preview при открытии XML Vector Drawable")
+    private val vectorPreviewSizeSpinner = JBIntSpinner(256, MIN_VECTOR_SIZE, MAX_VECTOR_SIZE, 64)
+
+    // Preview Settings - String Resource
     private val stringResourcePreviewCheckBox = JBCheckBox("Показывать preview строковых ресурсов")
     private val stringLanguageComboBox = JComboBox<LanguageOption>().apply {
         addItem(LanguageOption("default", "По умолчанию (values)"))
@@ -68,17 +77,23 @@ class Configurable : Configurable {
 
     // Jira Settings
     private val localPropertiesPathField = TextFieldWithBrowseButton().apply {
-        val descriptor = FileChooserDescriptorFactory.createSingleFileDescriptor()
+        val descriptor = FileChooserDescriptor(
+            true,
+            false,
+            false,
+            false,
+            false,
+            false,
+        )
             .withTitle("Выберите local.properties")
             .withDescription("Выберите файл local.properties с настройками Jira")
             .withFileFilter { it.name == "local.properties" || it.extension.equals("properties", true) }
 
-        addBrowseFolderListener(
-            "Выберите local.properties",
-            "Выберите файл local.properties с настройками Jira",
-            null,
-            descriptor
-        )
+        addActionListener {
+            FileChooser.chooseFile(descriptor, null, null, null) { file ->
+                text = file.path
+            }
+        }
     }
 
     private val jiraUrlField = JBTextField()
@@ -127,8 +142,6 @@ class Configurable : Configurable {
 
     override fun getDisplayName(): String = "Lenter"
 
-    // ==================== UI Creation ====================
-
     private fun createPanel(): JPanel = FormBuilder.createFormBuilder()
         .addOllamaSettingsSection()
         .addSeparator()
@@ -154,9 +167,12 @@ class Configurable : Configurable {
         .addComponent(JBLabel("<html><i>Включение/выключение визуального предпросмотра</i></html>").apply {
             border = JBUI.Borders.emptyBottom(5)
         })
+
+        // Compose Color Preview
         .addComponent(composeColorPreviewCheckBox)
         .addTooltip("Показывать квадраты с цветом для androidx.compose.ui.graphics.Color")
 
+        // Drawable Preview
         .addVerticalGap(10)
         .addComponent(JBLabel("<html><b>Drawable Preview:</b></html>"))
         .addComponent(drawablePreviewInCodeCheckBox)
@@ -164,6 +180,15 @@ class Configurable : Configurable {
         .addComponent(drawablePreviewInTreeCheckBox)
         .addTooltip("Показывать миниатюры drawable файлов в дереве проекта")
 
+        // Vector Drawable Editor Preview
+        .addVerticalGap(10)
+        .addComponent(JBLabel("<html><b>Vector Drawable Editor:</b></html>"))
+        .addComponent(vectorEditorPreviewCheckBox)
+        .addTooltip("Показывать вкладку Preview при открытии XML Vector Drawable файлов")
+        .addLabeledComponent("Размер preview (px):", vectorPreviewSizeSpinner, 1, false)
+        .addTooltip("Размер отображаемого preview ($MIN_VECTOR_SIZE-$MAX_VECTOR_SIZE пикселей)")
+
+        // String Resource Preview
         .addVerticalGap(10)
         .addComponent(JBLabel("<html><b>String Resource Preview:</b></html>"))
         .addComponent(stringResourcePreviewCheckBox)
@@ -234,6 +259,10 @@ class Configurable : Configurable {
         stringResourcePreviewCheckBox.addActionListener {
             stringLanguageComboBox.isEnabled = stringResourcePreviewCheckBox.isSelected
         }
+
+        vectorEditorPreviewCheckBox.addActionListener {
+            vectorPreviewSizeSpinner.isEnabled = vectorEditorPreviewCheckBox.isSelected
+        }
     }
 
     @Throws(ConfigurationException::class)
@@ -265,11 +294,19 @@ class Configurable : Configurable {
     @Throws(ConfigurationException::class)
     private fun validateAndApplyPreviewSettings() {
         val selectedLanguage = (stringLanguageComboBox.selectedItem as? LanguageOption)?.code ?: "default"
+        val vectorSize = vectorPreviewSizeSpinner.number
+
+        if (vectorSize !in MIN_VECTOR_SIZE..MAX_VECTOR_SIZE) {
+            throw ConfigurationException("Размер preview должен быть в диапазоне $MIN_VECTOR_SIZE-$MAX_VECTOR_SIZE пикселей")
+        }
 
         previewSettings.apply {
             composeColorPreviewEnabled = composeColorPreviewCheckBox.isSelected
             drawablePreviewInCodeEnabled = drawablePreviewInCodeCheckBox.isSelected
             drawablePreviewInTreeEnabled = drawablePreviewInTreeCheckBox.isSelected
+
+            vectorDrawableEditorPreviewEnabled = vectorEditorPreviewCheckBox.isSelected
+            vectorDrawablePreviewSize = vectorSize
 
             stringResourcePreviewEnabled = stringResourcePreviewCheckBox.isSelected
             stringResourcePreferredLanguage = selectedLanguage
@@ -303,8 +340,6 @@ class Configurable : Configurable {
         }
     }
 
-    // ==================== Reset ====================
-
     private fun resetOllamaSettings() {
         apiUrlField.text = ollamaSettings.ollamaApiUrl
         modelField.text = ollamaSettings.modelName
@@ -316,9 +351,12 @@ class Configurable : Configurable {
         drawablePreviewInCodeCheckBox.isSelected = previewSettings.drawablePreviewInCodeEnabled
         drawablePreviewInTreeCheckBox.isSelected = previewSettings.drawablePreviewInTreeEnabled
 
+        vectorEditorPreviewCheckBox.isSelected = previewSettings.vectorDrawableEditorPreviewEnabled
+        vectorPreviewSizeSpinner.number = previewSettings.vectorDrawablePreviewSize
+        vectorPreviewSizeSpinner.isEnabled = vectorEditorPreviewCheckBox.isSelected
+
         stringResourcePreviewCheckBox.isSelected = previewSettings.stringResourcePreviewEnabled
 
-        // Установить выбранный язык
         val languageCode = previewSettings.stringResourcePreferredLanguage
         for (i in 0 until stringLanguageComboBox.itemCount) {
             val item = stringLanguageComboBox.getItemAt(i)
@@ -328,7 +366,6 @@ class Configurable : Configurable {
             }
         }
 
-        // Обновить enabled состояние
         stringLanguageComboBox.isEnabled = stringResourcePreviewCheckBox.isSelected
     }
 
@@ -355,6 +392,8 @@ class Configurable : Configurable {
         return composeColorPreviewCheckBox.isSelected != previewSettings.composeColorPreviewEnabled ||
                 drawablePreviewInCodeCheckBox.isSelected != previewSettings.drawablePreviewInCodeEnabled ||
                 drawablePreviewInTreeCheckBox.isSelected != previewSettings.drawablePreviewInTreeEnabled ||
+                vectorEditorPreviewCheckBox.isSelected != previewSettings.vectorDrawableEditorPreviewEnabled ||
+                vectorPreviewSizeSpinner.number != previewSettings.vectorDrawablePreviewSize ||
                 stringResourcePreviewCheckBox.isSelected != previewSettings.stringResourcePreviewEnabled ||
                 selectedLanguage != previewSettings.stringResourcePreferredLanguage
     }
@@ -367,12 +406,12 @@ class Configurable : Configurable {
                 jiraProjectIdField.text.trim() != jiraSettings.jiraProjectId ||
                 jiraProjectKeyField.text.trim() != jiraSettings.jiraProjectKey ||
                 jiraIssueTypeField.text.trim() != jiraSettings.jiraIssueType ||
-                jiraPriorityField.text.trim() != jiraSettings.jiraPriority
+                jiraProjectIdField.text.trim() != jiraSettings.jiraPriority
     }
 
     private fun isValidUrl(urlString: String): Boolean {
         return runCatching {
-            val url = URL(urlString)
+            val url = URI.create(urlString).toURL()
             url.protocol in setOf("http", "https")
         }.getOrDefault(false)
     }
